@@ -29,9 +29,13 @@ def get_equipes():
 	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/equipes'
 	return requests.get(url, headers=HEADERS)
 
-response = get_equipes().json()
+def get_equipes_popular_name_list():
+	response = get_equipes().json()['resultados']['equipes']
+	ret = []
+	for t in response:
+        ret += 'banana'
 
-# obj = json.loads(response)
+    print ret
+	return ret
 
-pprint(response)
-print response
+print get_equipes_popular_name_list()
