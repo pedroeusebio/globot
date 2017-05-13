@@ -52,10 +52,10 @@ def get_next_game_formatted(team_id, date):
 	dia = game_info['data_realizacao']
 	horario = game_info['hora_realizacao']
 	estadio = get_stadium_name(ref, game_info['sede_id'])
-	meu_time = get_team_name(ref, team_id)
-	time_adversario = get_team_name(ref, game_info['equipe_visitante_id'])
+	timeA = get_team_name(ref, game_info['equipe_visitante_id'])
+	timeB = get_team_name(ref, game_info['equipe_mandante_id'])
 	#TODO: add logo for teams
-	return '''Campeonato Brasileiro 2017\n%s, %s\n%s\n%s x %s\n''' % (dia, horario, estadio, meu_time, time_adversario)
+	return '''Campeonato Brasileiro 2017\n%s, %s\n%s\n%s x %s\n''' % (dia, horario, estadio, timeA, timeB)
 	
 #response = get_next_game_formatted(266, "2017-05-01")
 #print(response)
