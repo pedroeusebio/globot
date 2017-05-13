@@ -37,13 +37,22 @@ def get_equipes_popular_name_list():
 		ret.append(t['nome_popular'])
 	return ret
 
+def get_equipe_by_name(name):
+    equipes_list = get_equipes_popular_name_list()
+    id = -1
+    for k, v in equipes_list.iteritems():
+        if name == k:
+            id = v
+    return id
+
 # (266, '2017-05-01') -> dict
 def get_next_game(team_id, date):
 	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/jogos?equipe_id=%s&data_hora_inicial=%s' % (team_id, date)
 	response = requests.get(url, headers=HEADERS)
 	return (response.json())['resultados']['jogos'][0]
 
-response = get_next_game(266, "2017-05-01")
-pprint(response)
+# response = get_next_game(266, "2017-05-01")
+# pprint(response)
 
-print get_equipes_popular_name_list()
+# print get_equipes_popular_name_list()
+print get_equipe_by_name('Flamengo')
