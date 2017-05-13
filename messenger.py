@@ -1,6 +1,6 @@
 from flask import Flask, request
-from pymessenger.bot import Bot
-from core.conversation import TextResponse
+from bot import Bot
+from conversation import TextResponse
 from repo import ConversationRepository
 
 conversation_repository = ConversationRepository()

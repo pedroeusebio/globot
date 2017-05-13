@@ -1,6 +1,8 @@
 from collections import namedtuple
-from core.user import User
+from user import User
 from fuzzywuzzy import fuzz
+import programacao
+from time import gmtime, strftime
 
 TextResponse = namedtuple('TextResponse', 'text')
 
@@ -28,6 +30,9 @@ class Conversation:
         if self.state == State.CONFIRMING_TEAM:
             return self.confirming_team(msg)
 
+        if self.state == State.INIT:
+            return self.process_request(msg)
+
         return self.default(msg)
 
     def onboarding(self, msg):
@@ -46,6 +51,25 @@ class Conversation:
             return TextResponse("Show! Então é isso.")
 
         return self.onboarding(msg)
+    
+    def find_next_token(self, msg):
+        return msg.find("proximo")
+    
+    def find_game_token(self, msg):
+        return msg.find("jogo")
 
+    def find_team_token(self, msg):
+        return msg.find("Flamengo")
+    
+    def process_request(self, msg):
+        next = self.find_next_token(msg)
+        game = self.find_game_token(msg)
+        team = self.find_team_token(msg)
+        if (next != -1 and game != -1 and team != -1):
+            if (next < game and game < team):
+                return TextResponse(programacao.get_next_game_formatted(266, strftime("%Y-%m-%d", gmtime())))
+
+        self.default(msg)
+                
     def default(self, msg):
         return TextResponse("Não sei o que dizer HAHAHA. Só vamo {}!".format(self.user.team_slug))
