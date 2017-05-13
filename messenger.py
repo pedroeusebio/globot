@@ -11,6 +11,28 @@ app = Flask(__name__)
 VERIFY_TOKEN = "globotftw"
 bot = Bot(secrets.ACCESS_TOKEN)
 
+"""
+@app.route("/polls", methods=['GET', 'POST'])
+def polls():
+    if request.method == 'GET':
+        poll_repo.get_all()
+    if request.method == 'POST':
+        # UC Create Poll
+        poll = Poll(argslalalamsdka)
+        poll_repo.save(poll)
+
+        buttons = map(lambda q: , poll.answers)
+
+        # send poll to assigned members
+        convs = conversation_repo.all()
+        all_users = map(lambda c: c.user, convs)
+        users = filter(lambda u: poll.is_for(u), convs)
+
+        for user in users:
+            bot.send_button_message(user.recipient_id, poll.text, )
+"""
+
+
 @app.route("/", methods=['GET', 'POST'])
 def hello():
     if request.method == 'GET':
