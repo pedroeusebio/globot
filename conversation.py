@@ -71,14 +71,39 @@ class Conversation:
                 return msg[ind:i] 
         return msg[ind:]
 
-    def process_request(self, msg):
-        next_ind = self.find_token_index(msg, ["proximo", "próximo"])
+
+    def isNextGameRequest(self, msg):
+        next_ind = self.find_token_index(msg, ["proximo", "próximo", "proxima", "próxima"])
         game_ind = self.find_token_index(msg, ["jogo", "partida", "game", "rodada"])
         team_ind = self.find_token_index(msg, utils.get_list_of_equipes_popular_names())
         if (next_ind != -1 and game_ind != -1 and team_ind != -1):
             if (next_ind < game_ind and game_ind < team_ind):
-                team_slug = self.get_token_on_ind(team_ind, msg)
-                return TextResponse(programacao.get_next_game_formatted(utils.get_equipe_id_by_slug(team_slug), strftime("%Y-%m-%d", gmtime())))
+                team_slug = utils.get_equipe_id_by_slug(self.get_token_on_ind(team_ind, msg).lower())
+                if (team_slug is not None):
+                    return TextResponse(programacao.get_next_game_formatted(team_slug, strftime("%Y-%m-%d", gmtime())))
+        return None
+
+    def isLastGameRequest(self, msg):
+        next_ind = self.find_token_index(msg, ["ultimo", "último", "anterior", "passada"])
+        game_ind = self.find_token_index(msg, ["jogo", "partida", "game", "rodada"])
+        team_ind = self.find_token_index(msg, utils.get_list_of_equipes_popular_names())
+        if (next_ind != -1 and game_ind != -1 and team_ind != -1):
+            if (next_ind < game_ind and game_ind < team_ind):
+                team_slug = utils.get_equipe_id_by_slug(self.get_token_on_ind(team_ind, msg).lower())
+                if (team_slug is not None):
+                    return TextResponse(programacao.get_last_game_formatted(team_slug, strftime("%Y-%m-%d", gmtime())))
+        return None
+
+    def process_request(self, msg):
+        resp = self.isNextGameRequest(msg)
+        if resp is not None:
+            return resp
+        
+        resp = self.isLastGameRequest(msg)
+        if resp is not None:
+            return resp
+        
+
         self.default(msg)
                 
     def default(self, msg):
