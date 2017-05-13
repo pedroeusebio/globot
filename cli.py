@@ -1,4 +1,4 @@
-from core.conversation import TextResponse
+from conversation import TextResponse
 from repo import ConversationRepository
 
 fake_id = 1234

@@ -1,4 +1,4 @@
-from core.conversation import Conversation
+from conversation import Conversation
 
 class ConversationRepository:
     def __init__(self):
