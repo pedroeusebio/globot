@@ -1,3 +1,4 @@
+import secrets
 from flask import Flask, request
 from bot import Bot
 from conversation import TextResponse
@@ -7,9 +8,8 @@ conversation_repository = ConversationRepository()
 
 app = Flask(__name__)
 
-ACCESS_TOKEN = "EAAUiQJbwNboBABscA7dPr6dtBll5yTwo4TZCybdV89aVBNXbAFMJFVKbcwcRef4WdIa261AYIakYYZArZAiXRsFcCCmqvDm9dVWh8e2ytgz1dC6BRwyXxAyOY8apXPNeTb7HhzoTjwAwxoxzfEs4nzr9HD2tTwtbZBxh0DveUQZDZD"
 VERIFY_TOKEN = "globotftw"
-bot = Bot(ACCESS_TOKEN)
+bot = Bot(secrets.ACCESS_TOKEN)
 
 @app.route("/", methods=['GET', 'POST'])
 def hello():
