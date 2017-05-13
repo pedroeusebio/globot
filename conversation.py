@@ -80,7 +80,7 @@ class Conversation:
             if (next_ind < game_ind and game_ind < team_ind):
                 team_slug = utils.get_equipe_id_by_slug(self.get_token_on_ind(team_ind, msg).lower())
                 if (team_slug is not None):
-                    return TextResponse(programacao.get_next_game_formatted(team_slug, strftime("%Y-%m-%d", gmtime())))
+                    return TextResponse(programacao.get_next_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))
         return None
 
     def isLastGameRequest(self, msg):
@@ -91,7 +91,7 @@ class Conversation:
             if (next_ind < game_ind and game_ind < team_ind):
                 team_slug = utils.get_equipe_id_by_slug(self.get_token_on_ind(team_ind, msg).lower())
                 if (team_slug is not None):
-                    return TextResponse(programacao.get_last_game_formatted(team_slug, strftime("%Y-%m-%d", gmtime())))
+                    return TextResponse(programacao.get_last_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))
         return None
 
     def process_request(self, msg):
