@@ -58,9 +58,15 @@ def get_list_of_equipes_popular_names():
 		ret.append(equipe['nome_popular'])
 	return ret
 
-def get_next_game_by_equipe_id(equipe_id, initial_date):
+def get_next_game_by_equipe_id_initial_date(equipe_id, initial_date = '2017-03-13'):
 	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/jogos?equipe_id=%s&data_hora_inicial=%s' % (equipe_id, initial_date)
 	response = requests.get(url, headers=HEADERS)
 	return (response.json())['resultados']['jogos'][0]
 
-pprint(get_list_of_equipes_popular_names())
+def get_game_by_mandante_slug_visitante_slug_date(mandante_slug, visitante_slug, date):
+	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/jogos?equipe_id=%s&data_hora_inicial=%s&data_hora_final=%s' % (get_equipe_id_by_slug(mandante_slug), date, date)
+	response = requests.get(url, headers=HEADERS)
+	return response.json()
+
+# pprint(get_next_game_by_equipe_id_initial_date(get_equipe_id_by_slug('flamengo')))
+# pprint(get_game_by_mandante_slug_visitante_slug_date('flamengo', 'atleticomg', '2017-05-13'))
