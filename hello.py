@@ -29,11 +29,18 @@ def get_equipes():
 	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/equipes'
 	return requests.get(url, headers=HEADERS)
 
+# -> List<String>
+def get_equipes_popular_name_list():
+	response = get_equipes().json()['resultados']['equipes']
+	ret = []
+	for t in response:
+		ret.append(t['nome_popular'])
+	return ret
+
 def get_next_game(team_id, date):
 	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/jogos?equipe_id=%s&data_hora_inicial=%s' % (team_id, date)
-	pprint (url)
-	resp = requests.get(url, headers=HEADERS)
-	return (resp.json())['resultados']['jogos'][0]
+	response = requests.get(url, headers=HEADERS)
+	return (response.json())['resultados']['jogos'][0]
 
 response = get_next_game(266, "2017-05-01")
 pprint(response)
