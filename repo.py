@@ -19,8 +19,19 @@ class ConversationRepository:
     def get_by_team(self, team_slug):
         return [c for c in self.get_all() if c.user.team_slug == team_slug]
 
-    def get_by_interest(self, team_slug):
-        return [c for c in self.get_all() if (c.user.team_slug == team_slug or c.user.interest == team_slug) ]
+    def get_by_realtime(self, match):
+        cond = lambda c: c.realtime_subs.has(match)
+        return self.get_cond(cond)
+
+    def get_by_interest(self, match):
+        cond = lambda c: (
+            c.user.team_slug in [match.mandante, match.visitante] or
+            c.interest_subs.has(match)
+        )
+        return self.get_cond(cond)
+
+    def get_cond(self, cond):
+        return [c for c in self.get_all() if cond(c)]
 
 class PollRepository:
     def __init__(self):

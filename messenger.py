@@ -2,7 +2,7 @@ import secrets
 import json
 from flask import Flask, request, jsonify, send_from_directory
 from pymessenger import Bot
-from conversation import TextResponse,ImageUrlResponse, YesNoResponse
+from conversation import TextResponse,ImageUrlResponse, YesNoResponse, Match
 from repo import ConversationRepository, PollRepository
 from poll import Poll
 from user import TeamSlugFilter
@@ -124,10 +124,8 @@ def sendReaTimeMessage():
     msg = args.get('msg')
     img = args.get('img')
 
-    convs_mandante  = conversation_repository.get_by_team(mandante)
-    convs_visitante  = conversation_repository.get_by_team(visitante)
-
-    convs = convs_mandante + convs_visitante
+    match = Match(mandante, visitante)
+    convs  = conversation_repository.get_by_realtime(match)
 
     for conv in convs:
         bot.send_text_message(conv.user.recipient_id, msg)
@@ -141,14 +139,12 @@ def notifyGame():
     args = request.get_json()
     mandante =  args.get('mandante')
     visitante = args.get('visitante')
+    match = Match(mandante, visitante)
 
-    convs_mandante  = conversation_repository.get_by_interest(mandante)
-    convs_visitante  = conversation_repository.get_by_interest(visitante)
-
-    convs = convs_mandante + convs_visitante
+    convs  = conversation_repository.get_by_interest(match)
 
     for conv in convs:
-        responses = conv.notify_game(mandante, visitante)
+        responses = conv.notify_game(match)
         send_response(conv.user.recipient_id, responses)
 
     return "Success"

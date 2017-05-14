@@ -18,7 +18,6 @@ class User:
         self.team_slug = None
         self.team_popular_name = None
         self.team_id = None
-        self.interest = None
         self.name = self.get_name(recipient_id)
 
     def get_name(self, recipient_id):

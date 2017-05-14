@@ -61,7 +61,7 @@ done_arr = []
 
 seen = {}
 
-def present(entry):
+def present(date, mandante, visitante, entry):
     desc = entry['desc'].strip()
     titulo = entry['title']
     timestr = entry['period']
@@ -73,6 +73,7 @@ def present(entry):
     json = {
         'mandante': mandante,
         'visitante': visitante,
+        'date': date,
         'msg': msg}
 
     if entry['img']:
@@ -120,7 +121,8 @@ def update_minute():
             print("Sending msg id {}".format(x['id']))
 
             if (x['desc'] != '\n'):
-                requests.post('http://a6824bbf.ngrok.io/sendRealTimeMessage/', json = {present(x)})
+                json = present(date_arr[i], mandante_arr[i], visitante_arr[i], x)
+                requests.post('http://a6824bbf.ngrok.io/sendRealTimeMessage/', json = json)
 
 
 def notify_new_game(): 
@@ -131,7 +133,7 @@ def notify_new_game():
         date = next_game['data_realizacao']
         mandante = get_slug_by_equipe_id(next_game['equipe_mandante_id'])
         visitante = get_slug_by_equipe_id(next_game['equipe_visitante_id'])
-        requests.post('http://a6824bbf.ngrok.io/notifyGame/', json = {'mandante': mandante, 'visitante': visitante})
+        requests.post('http://a6824bbf.ngrok.io/notifyGame/', json = {'date': date, 'mandante': mandante, 'visitante': visitante})
         date_arr.append(date)
         mandante_arr.append(mandate)
         visitante_arr.append(visitante)

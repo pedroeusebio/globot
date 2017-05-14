@@ -13,6 +13,25 @@ TextResponse = namedtuple('TextResponse', 'text')
 ImageUrlResponse = namedtuple('ImageUrlResponse', 'url')
 YesNoResponse = namedtuple('YesNoResponse', 'text')
 
+Match = namedtuple('Match', 'mandante visitante')
+
+class Subscriptions:
+    def __init__(self):
+        self.pending = None
+        self.subbed = set()
+
+    def add(self, k):
+        self.pending = k
+
+    def confirm(self):
+        self.subbed.add(self.pending)
+        self.pending = None
+
+    def cancel(self):
+        self.pending = None
+
+    def has(self, k):
+        return k in self.subbed
 
 class State:
     ONBOARDING = 1
@@ -35,6 +54,8 @@ class Conversation:
     def __init__(self, recipient_id):
         self.user = User(recipient_id)
         self.state = State.ONBOARDING
+        self.realtime_subs = Subscriptions()
+        self.interest_subs = Subscriptions()
         self.messages = []
         database.Conversations[recipient_id] = self
         database.Users[recipient_id] = self.user
@@ -56,6 +77,9 @@ class Conversation:
 
         if self.state == State.YESNO_NOTIFY:
             return self.yesno_notify(msg)
+
+        if self.state == State.YESNO_REALTIME:
+            return self.yesno_realtime(msg)
 
         return self.default(msg)
 
@@ -86,9 +110,18 @@ class Conversation:
     def yesno_notify(self, msg):
         self.state = State.PROCESSING
         if is_positive(msg):
+            self.interest_subs.confirm()
             return TextResponse("Ok! Irei te avisar quando for a hora 😉")
         else:
-            self.user.interest = None
+            self.interest_subs.cancel()
+
+    def yesno_realtime(self, msg):
+        self.state = State.PROCESSING
+        if is_positive(msg):
+            self.realtime_subs.confirm()
+            return TextResponse("Ok! Você irá receber o jogo em tempo real. 😉")
+        else:
+            self.realtime_subs.cancel()
 
     def get_min_index_from_arr(self, arr, msg):
         index = len(msg)
@@ -146,8 +179,10 @@ class Conversation:
     def default(self, msg):
         return TextResponse("Não sei o que dizer HAHAHA. Só vamos, {}! ⚽".format(self.user.team_popular_name))
 
-    def notify_game(self, mandante, visitante):
+    def notify_game(self, match):
+        mandante, visitante = match
         msg = "Jogo %s x %s começando em 1 hora.\nDeseja receber notificações em tempo real?" % (mandante, visitante)
+        self.realtime_subs.add(match)
         self.state = State.YESNO_REALTIME
         return YesNoResponse(msg)
 
@@ -162,7 +197,7 @@ class Conversation:
                 msg += "\nDeseja ser notificado 1 hora antes do início do jogo?"
 
                 self.state = State.YESNO_NOTIFY
-                self.user.interest = team_slug
+                self.interest_subs.add(team_slug)
 
                 return YesNoResponse(msg)
 
