@@ -84,9 +84,7 @@ def get_last_game_formatted(team_id, date):
 	return '''Campeonato Brasileiro 2017\n%s, %s\n%s\n%s %s - %s %s\n''' % (dia, horario, estadio, timeA, scoreA, scoreB, timeB)
 
 #url = 'https://api.sde.globo.com/jogos/211240/scouts'
-url = 'https://api.sde.globo.com/atletas/63007'
-resp = requests.get(url, headers=HEADERS)
-pprint(resp)
+
 #response = get_next_game_formatted(266, "2017-05-01")
 #print(response)
 

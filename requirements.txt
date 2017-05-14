@@ -2,3 +2,4 @@ flask
 pymessenger
 facebook-sdk
 fuzzywuzzy
+selenium
