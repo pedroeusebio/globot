@@ -32,6 +32,14 @@ def polls():
             bot.send_button_message(user.recipient_id, poll.text, )
 """
 
+def get_conversations_for(team_slug):
+    ret = []
+
+    for recipient_id, conversation in conversation_repository.conversations:
+        if conversation.user.team_slug == team_slug:
+            ret.append(conversation)
+
+    return ret
 
 @app.route("/", methods=['GET', 'POST'])
 def hello():
@@ -58,6 +66,26 @@ def hello():
                     pass
         return "Success"
 
+@app.route("/sendRealTimeMessage/", methods=['POST'])
+def sendReaTimeMessage():
+    if request.method == 'POST':
+        mandante =  request.args.get('mandante')
+        visitante = request.args.get('visitante')
+        msg = request.args.post('msg')
+
+        convs_mandante  = get_conversations_for(mandante)
+        convs_visitante = get_conversations_for(visitante)
+
+        convs = []
+
+        if len(convs_mandante) > 1:
+            convs += convs_mandante
+
+        if len(convs_visitante) > 1:
+            convs += convs_visitante
+
+        for conv in convs:
+            bot.send_text_message(msg)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

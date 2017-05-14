@@ -68,7 +68,7 @@ class Conversation:
 
         self.state = State.ASKING_TEAM
         return TextResponse('Por favor, tente novamente. Qual o seu time do coração? <3')
-    
+
     def get_min_index_from_arr(self, arr, msg):
         index = len(msg)
         for x in  arr:

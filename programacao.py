@@ -42,7 +42,7 @@ def get_next_game(team_id, date):
 	if ('jogos' in resp['resultados'].keys()):
 		return resp['resultados']['jogos'][0],  resp['referencias']
 	return "Nao foram encontrado jogos futuros.", None
-	
+
 # Formato da resposta:
 #  Campeonato Brasileiro 2017
 #  Dia, Horario
