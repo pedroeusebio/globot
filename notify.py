@@ -113,7 +113,11 @@ def update_minute():
         if (done[i]):
             continue
 
-        resp = fake_get_from_server(date_arr[i], mandante_arr[i], visitante_arr[i])
+        api_date = date_arr[i]
+        date_parts = date.split("-")
+        date_parts.reverse()
+        date = "-".join(date_parts)
+        resp = fake_get_from_server(date, mandante_arr[i], visitante_arr[i])
         for x in resp:
             if (x['id'] in seen):
                 continue

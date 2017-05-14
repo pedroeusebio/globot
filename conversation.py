@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pprint import pprint 
 
 import database
 from collections import namedtuple
@@ -173,8 +174,44 @@ class Conversation:
 
             team_id = utils.get_equipe_id_by_slug(team_slug)
             if (team_id is not None):
-                return (team_slug, programacao.get_last_game_formatted(team_id, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))
+                return (team_slug, programacao.get_last_game_formatted(team_id, ))
         return None
+
+    def getGameData(self, msg):
+        maxlen = len(msg)
+        prev_ind = self.find_token_index(msg, ["ultimo", "último", "anterior", "passada"])
+        game_ind = self.find_token_index(msg, ["jogo", "partida", "game", "rodada"])
+        team_ind = self.find_token_index(msg, utils.get_list_of_equipes_popular_names())
+        date_limit = strftime("%Y-%m-%dT%H:%M:%S", gmtime())
+        upcoming = True
+
+        if (game_ind == maxlen):
+            return None
+
+        if (prev_ind != maxlen):
+            upcoming = False
+
+        team_slug = ""
+        if (team_ind != maxlen):
+            team_slug = self.get_token_on_ind(team_ind, msg).lower()
+        else:
+            team_slug = self.user.team_slug
+
+        team_id = utils.get_equipe_id_by_slug(team_slug)
+
+        if upcoming:
+            game_info, ref = programacao.get_next_game(team_id, date_limit)
+            pprint(team_slug)
+            pprint(team_id)
+            pprint(game_info)
+            pprint(ref)
+        else:
+            game_info, ref = programacao.get_last_game(team_id, date_limit)
+
+        if game_info is None:
+            return upcoming, None, None
+
+        return upcoming, game_info, ref
 
     def default(self, msg):
         return TextResponse("Não sei o que dizer HAHAHA. Só vamos, {}! ⚽".format(self.user.team_popular_name))
@@ -187,23 +224,28 @@ class Conversation:
         return YesNoResponse(msg)
 
     def process_request(self, msg):
-        game_data = self.isNextGameRequest(msg)
+        game_data = self.getGameData(msg)
         if game_data is not None:
-            team_slug, msg = game_data
-            if (msg == "Não foram encontrado jogos futuros."):
-                return TextResponse(msg)
+            upcoming, game_info, ref = game_data
+            if game_info is None:
+                return TextResponse("Não foi encontrado um jogo {}.".format("futuro" if upcoming else "passado"))
 
-            else:
-                msg += "\nDeseja ser notificado 1 hora antes do início do jogo?"
+            game_msg = programacao.format_game(upcoming, game_info, ref)
+
+            if upcoming:
+                msg = game_msg + "\nDeseja ser notificado 1 hora antes do início do jogo?"
 
                 self.state = State.YESNO_NOTIFY
-                self.interest_subs.add(team_slug)
+                mandante_id = game_info['equipe_mandante_id']
+                mandante_slug = utils.get_slug_by_equipe_id(mandante_id)
+                visitante_id = game_info['equipe_visitante_id']
+                visitante_slug = utils.get_slug_by_equipe_id(visitante_id)
+                match = Match(mandante_slug, visitante_slug)
+                self.interest_subs.add(match)
+                pprint(self.interest_subs.__dict__)
 
                 return YesNoResponse(msg)
-
-        game_data = self.isLastGameRequest(msg)
-        if game_data is not None:
-            team_slug, resp = game_data
-            return TextResponse(resp)
+            else:
+                return TextResponse(game_msg)
 
         return self.default(msg)
