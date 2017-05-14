@@ -67,6 +67,3 @@ def get_game_by_mandante_slug_visitante_slug_date(mandante_slug, date):
 	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/jogos?equipe_id=%s&data_hora_inicial=%s&data_hora_final=%s' % (get_equipe_id_by_slug(mandante_slug), date, date)
 	response = requests.get(url, headers=HEADERS)
 	return response.json()
-
-# pprint(get_next_game_by_equipe_id_initial_date(get_equipe_id_by_slug('flamengo')))
-# pprint(get_game_by_mandante_slug_visitante_slug_date('flamengo', '2017-05-13'))

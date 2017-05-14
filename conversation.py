@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+import database
 from collections import namedtuple
 from user import User
 from fuzzywuzzy import fuzz
@@ -14,10 +17,15 @@ class State:
     PROCESSING = 4
 
 class Conversation:
+
+    yes_array = ['sim', 'yes', 'yeah', 'si', 'claro', 'isso']
+
     def __init__(self, recipient_id):
         self.user = User(recipient_id)
         self.state = State.ONBOARDING
         self.messages = []
+        database.Conversations[recipient_id] = self
+        database.Users[recipient_id] = self.user
 
     def message(self, msg):
         self.messages.append(msg)
@@ -38,21 +46,29 @@ class Conversation:
 
     def onboarding(self, msg):
         self.state = State.ASKING_TEAM
-        return TextResponse("Ola, {}. Vamos começar. Qual seu time do coração?".format(self.user.name))
+        return TextResponse("Olá, {}. Vamos começar. Qual é o seu time do coração? <3".format(self.user.name))
 
     def asking_team(self, msg):
-        # TODO : Use api
-        self.user.team_slug = msg
-        self.state = State.CONFIRMING_TEAM
-        return TextResponse("Irado! Seu time é o {}, certo?".format(self.user.team_slug))
+        equipes = utils.get_list_of_equipes_popular_names() # String: 'Flamengo'
+        for equipe in equipes:
+            if fuzz.ratio(equipe, msg) > 49:
+                self.user.team_slug = msg.lower().replace(" ", "-")
+                self.user.team_id = utils.get_equipe_id_by_slug(self.user.team_slug)
+                if self.user.team_id is None:
+                    break
+                self.state = State.CONFIRMING_TEAM
+                return TextResponse("Irado! Seu time é o {}, certo?".format(self.user.team_slug))
+        return TextResponse('Você entrou com um time inválido! Por favor, tente novamente.')
 
     def confirming_team(self, msg):
-        if fuzz.ratio(msg, 'sim') > 49:
-            self.state = State.PROCESSING
-            return TextResponse("Show! Então é isso.")
+        for yess in Conversation.yes_array:
+            if yess.lower() == msg.lower():
+                self.state = State.PROCESSING
+                return TextResponse("Show! Vamos torcer juntos para o {}!!".format(self.user.team_slug))
 
-        return self.onboarding(msg)
-    
+        self.state = State.ASKING_TEAM
+        return TextResponse('Por favor, tente novamente. Qual o seu time do coração? <3')
+
     def get_min_index_from_arr(self, arr, msg):
         index = len(msg)
         for x in  arr:
@@ -98,13 +114,13 @@ class Conversation:
         resp = self.isNextGameRequest(msg)
         if resp is not None:
             return resp
-        
+
         resp = self.isLastGameRequest(msg)
         if resp is not None:
             return resp
-        
+
 
         self.default(msg)
-                
+
     def default(self, msg):
         return TextResponse("Não sei o que dizer HAHAHA. Só vamo {}!".format(self.user.team_slug))
