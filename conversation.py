@@ -5,6 +5,7 @@ from collections import namedtuple
 from user import User
 from fuzzywuzzy import fuzz
 import programacao
+import random
 import utils
 from time import gmtime, strftime
 
@@ -120,6 +121,13 @@ class Conversation:
                 return TextResponse(programacao.get_last_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))
         return None
 
+    def dontFuckWithMe(self, msg):
+        msg = msg.lower()
+        tries = ['bosta', 'merda', 'foda', 'foder', 'fuder', 'tomar no c', 'toma no c', 'puta', 'puto', 'caralho', 'porra', 'vtnc', 'viado', 'merdinha', 'bostinha']
+        for a_try in tries:
+            if a_try in msg:
+                return random.choice(['Seu arrombado!', 'Sua mãe!', 'Näo me fode', 'Vou te desmaiar, seu bostinha!', '{} é um time bosta. Que nem você!'.format(self.user.team_popular_name)])
+        return None
 
     def default(self, msg):
         return TextResponse("Não sei o que dizer HAHAHA. Só vamos, {}! ⚽".format(self.user.team_popular_name))
@@ -131,6 +139,10 @@ class Conversation:
             return resp
 
         resp = self.isLastGameRequest(msg)
+        if resp is not None:
+            return resp
+
+        resp = self.dontFuckWithMe(msg)
         if resp is not None:
             return resp
 
