@@ -80,10 +80,14 @@ def get_game_by_mandante_slug_visitante_slug_date(mandante_slug, date):
 	return response.json()
 
 def get_nickname_from_slug(slug):
+	# Upstream: http://nomeschiques.com/lista-de-25-apelidos-de-times-brasileiros-e-seus-rivais-humor/
 	d = {
 		'flamengo': 'Mengão',
 		'vasco': 'Vascão',
 		'botafogo': 'Fogão',
 		'fluminense': 'Nense',
+		'atlético-mg': 'Galo',
+		'corinthians': 'Timão',
+		'internacional': 'Inter',
 	}
 	return d.get(slug, slug)
