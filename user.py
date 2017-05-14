@@ -15,4 +15,7 @@ class User:
     def get_name(self, recipient_id):
         query = VERSION + str(recipient_id)
         data = graph.request(query)
-        return data['name']
+        for key in ['first_name', 'name', 'last_name']:
+            if key in data:
+                return data[key]
+        return "colega"
