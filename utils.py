@@ -78,3 +78,12 @@ def get_game_by_mandante_slug_visitante_slug_date(mandante_slug, date):
 	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/jogos?equipe_id=%s&data_hora_inicial=%s&data_hora_final=%s' % (get_equipe_id_by_slug(mandante_slug), date, date)
 	response = requests.get(url, headers=HEADERS)
 	return response.json()
+
+def get_nickname_from_slug(slug):
+	d = {
+		'flamengo': 'Mengão',
+		'vasco': 'Vascão',
+		'botafogo': 'Fogão',
+		'fluminense': 'Nense',
+	}
+	return d.get(slug, slug)

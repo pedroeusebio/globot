@@ -67,7 +67,7 @@ class Conversation:
         for yess in Conversation.yes_array:
             if yess.lower() == msg.lower():
                 self.state = State.PROCESSING
-                return [TextResponse("Show! Vamos torcer juntos para o {}!!".format(self.user.team_popular_name)), ImageUrlResponse(utils.get_equipe_escudo_url_by_id(self.user.team_id))]
+                return [TextResponse("Show! Vamos torcer juntos para o {}!!".format(utils.get_nickname_from_slug(self.user.team_slug)), ImageUrlResponse(utils.get_equipe_escudo_url_by_id(self.user.team_id))]
         self.state = State.ASKING_TEAM
         return TextResponse('Por favor, tente novamente. Qual o seu time do coração? <3')
 
@@ -86,7 +86,7 @@ class Conversation:
     def get_token_on_ind(self, ind, msg):
         for i in range(ind, len(msg)):
             if (not msg[i].isalpha()):
-                return msg[ind:i] 
+                return msg[ind:i]
         return msg[ind:]
 
 
