@@ -22,6 +22,22 @@ $(document).ready(function() {
   });
   window.setInterval(updatePolls, 10000);
   updatePolls();
+
+  $("#createPoll").submit(function(e) {
+    e.preventDefault();
+    var payload = {
+      question: $(".js-question").val(),
+      team: $(".js-time").val(),
+      options: $(".js-option").map((i,x) => $(x).val()).toArray()
+    };
+    $.ajax({
+      method: 'POST',
+      url: '/createPoll/',
+      contentType: 'application/json',
+      data: JSON.stringify(payload)
+    }).then(updatePolls).then($('#alternate').click());
+  });
+
 });
 
 function updatePolls(){
@@ -30,20 +46,6 @@ function updatePolls(){
   });
 }
 
-$("#createPoll").submit(function(e) {
-  e.preventDefault();
-  var payload = {
-    question: $(".js-question").val(),
-    team: $(".js-time").val(),
-    options: $(".js-option").map((i,x) => $(x).val()).toArray()
-  };
-  $.ajax({
-    method: 'POST',
-    url: '/createPoll/',
-    contentType: 'application/json',
-    data: JSON.stringify(payload)
-  }).then(updatePolls);
-});
 
 function renderPoll(poll){
   var totalVotes = poll.options.map((x) => poll.results[x]).reduce((a,b) => a+b);
