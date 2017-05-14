@@ -77,7 +77,7 @@ def answer_poll(recipient_id, poll_uid, option):
 def make_button(title, payload):
     return {
         "type": "postback",
-        "title": o,
+        "title": title,
         "payload": json.dumps(payload)
     }
 

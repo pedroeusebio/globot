@@ -117,11 +117,13 @@ class Conversation:
         if (next_ind != maxlen and game_ind != maxlen):
             team_slug = ""
             if (team_ind != maxlen):
-                team_slug = utils.get_equipe_id_by_slug(self.get_token_on_ind(team_ind, msg).lower())
+                team_slug = self.get_token_on_ind(team_ind, msg).lower()
             else:
-                team_slug = utils.get_equipe_id_by_slug(self.user.team_slug)
-            if (team_slug is not None):
-                return (team_slug, programacao.get_next_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))    
+                team_slug = self.user.team_slug
+
+            team_id = utils.get_equipe_id_by_slug(team_slug)
+            if (team_id is not None):
+                return (team_slug, programacao.get_next_game_formatted(team_id, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))
         return None
 
     def isLastGameRequest(self, msg):
@@ -132,11 +134,13 @@ class Conversation:
         if (next_ind != maxlen and game_ind != maxlen):
             team_slug = ""
             if (team_ind != maxlen):
-                team_slug = utils.get_equipe_id_by_slug(self.get_token_on_ind(team_ind, msg).lower())
+                team_slug = self.get_token_on_ind(team_ind, msg).lower()
             else:
-                team_slug = utils.get_equipe_id_by_slug(self.user.team_slug)
-            if (team_slug is not None):
-                return (team_slug, programacao.get_last_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))    
+                team_slug = self.user.team_slug
+
+            team_id = utils.get_equipe_id_by_slug(team_slug)
+            if (team_id is not None):
+                return (team_slug, programacao.get_last_game_formatted(team_id, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))
         return None
 
     def default(self, msg):
