@@ -48,7 +48,7 @@ class Conversation:
 
     def onboarding(self, msg):
         self.state = State.ASKING_TEAM
-        return TextResponse("Olá, {}. Vamos começar. Qual é o seu time do coração? <3".format(self.user.name))
+        return TextResponse("Alô alô, vamos nessa, {}! ⚽ \nQual é o seu time do coração? <3".format(self.user.name))
 
     def asking_team(self, msg):
         equipes = utils.get_list_of_equipes_popular_names() # String: 'Flamengo'
@@ -60,7 +60,7 @@ class Conversation:
                 if self.user.team_id is None:
                     break
                 self.state = State.CONFIRMING_TEAM
-                return TextResponse("Irado! Seu time é o {}, certo?".format(self.user.team_popular_name))
+                return TextResponse("Irado! 😎 Seu time é o {}, né?".format(self.user.team_popular_name))
         return TextResponse('Você entrou com um time inválido! Por favor, tente novamente.')
 
     def confirming_team(self, msg):
@@ -102,7 +102,7 @@ class Conversation:
             else:
                 team_slug = utils.get_equipe_id_by_slug(self.user.team_slug)
             if (team_slug is not None):
-                return TextResponse(programacao.get_next_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))    
+                return TextResponse(programacao.get_next_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))
         return None
 
     def isLastGameRequest(self, msg):
@@ -117,12 +117,12 @@ class Conversation:
             else:
                 team_slug = utils.get_equipe_id_by_slug(self.user.team_slug)
             if (team_slug is not None):
-                return TextResponse(programacao.get_last_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))    
+                return TextResponse(programacao.get_last_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))
         return None
 
 
     def default(self, msg):
-        return TextResponse("Não sei o que dizer HAHAHA. Só vamo {}!".format(self.user.team_popular_name))
+        return TextResponse("Não sei o que dizer HAHAHA. Só vamos, {}! ⚽".format(self.user.team_popular_name))
 
 
     def process_request(self, msg):
