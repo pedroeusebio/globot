@@ -1,8 +1,14 @@
 from selenium import webdriver
 from pprint import pprint
 from random import random
-import requests
 import time
+import json
+import requests
+import urllib
+
+HEADERS = {'token': 'hack2017-grupo3'}
+URL_BASE = 'https://api.sde.globo.com/esportes/futebol/modalidades/futebol_de_campo/categorias/profissional'
+
 
 url = 'http://globoesporte.globo.com/rj/futebol/brasileirao-serie-a/jogo/13-05-2017/flamengo-atletico-mg/'
 
@@ -49,6 +55,13 @@ seen = {}
 def present(entry):
 	return entry['desc']
 
+def get_next_game(date_st, date_end):
+	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/jogos?data_hora_inicial=%s&data_hora_final=%s' % (date_st, date_end)
+	resp = requests.get(url, headers=HEADERS).json()
+	if ('jogos' in resp['resultados'].keys()):
+		return resp['resultados']['jogos'][0],  resp['referencias']
+	return "Nao foram encontrado jogos futuros.", None
+
 while True:
 	arr = []
 	resp = fake_get_from_server()
@@ -62,4 +75,4 @@ while True:
 			requests.post('http://a6824bbf.ngrok.io/sendRealTimeMessage/', json = {'mandante': mandante, 'visitante': visitante, 'msg': present(x)})
 			
 		
-	time.sleep(5)
+	time.sleep(15)

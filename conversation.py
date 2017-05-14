@@ -17,6 +17,7 @@ class State:
     ASKING_TEAM = 2
     CONFIRMING_TEAM = 3
     PROCESSING = 4
+    NOTIFY = 5
 
 class Conversation:
 
@@ -128,6 +129,7 @@ class Conversation:
     def process_request(self, msg):
         resp = self.isNextGameRequest(msg)
         if resp is not None:
+            self.state = state.NOTIFY
             return resp
 
         resp = self.isLastGameRequest(msg)
