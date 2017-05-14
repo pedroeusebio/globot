@@ -1,6 +1,6 @@
 import secrets
 from flask import Flask, request
-from bot import Bot
+from pymessenger import Bot
 from conversation import TextResponse
 from repo import ConversationRepository
 
@@ -32,15 +32,6 @@ def polls():
             bot.send_button_message(user.recipient_id, poll.text, )
 """
 
-def get_conversations_for(team_slug):
-    ret = []
-
-    for recipient_id, conversation in conversation_repository.conversations:
-        if conversation.user.team_slug == team_slug:
-            ret.append(conversation)
-
-    return ret
-
 @app.route("/", methods=['GET', 'POST'])
 def hello():
     if request.method == 'GET':
@@ -66,26 +57,39 @@ def hello():
                     pass
         return "Success"
 
+
+@app.route("/createPoll/", methods=['POST'])
+def createPoll():
+    if request.method == 'POST':
+        question = request.args.get('question')
+        options = request.args.get('question')
+        team = request.args.get('team')
+
+        convs  = get_conversations_for(team)
+        for recipient_id, conv in convs:
+            bot.send_text_message(recipient_id, t )
+
+
 @app.route("/sendRealTimeMessage/", methods=['POST'])
 def sendReaTimeMessage():
     if request.method == 'POST':
-        mandante =  request.args.get('mandante')
-        visitante = request.args.get('visitante')
-        msg = request.args.post('msg')
+        args = request.get_json()
+        mandante =  args.get('mandante')
+        visitante = args.get('visitante')
+        msg = args.get('msg')
 
-        convs_mandante  = get_conversations_for(mandante)
-        convs_visitante = get_conversations_for(visitante)
+        convs_mandante  = conversation_repository.get_by_team(mandante)
+        convs_visitante  = conversation_repository.get_by_team(visitante)
 
-        convs = []
+        convs = convs_mandante + convs_visitante
 
-        if len(convs_mandante) > 1:
-            convs += convs_mandante
-
-        if len(convs_visitante) > 1:
-            convs += convs_visitante
+        from pprint import pprint
+        pprint(convs)
 
         for conv in convs:
-            bot.send_text_message(msg)
+            bot.send_text_message(conv.user.recipient_id, msg)
+
+        return "Success"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
