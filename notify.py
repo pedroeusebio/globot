@@ -12,8 +12,10 @@ HEADERS = {'token': 'hack2017-grupo3'}
 URL_BASE = 'https://api.sde.globo.com/esportes/futebol/modalidades/futebol_de_campo/categorias/profissional'
 
 def get_from_server(date,mandante,visitante):
+    print("Getting from server {} {} {}".format(date, mandante,visitante))
     wd = webdriver.PhantomJS()
     url = "http://globoesporte.globo.com/rj/futebol/brasileirao-serie-a/jogo/{}/{}-{}/".format(date,mandante,visitante)
+    print(url)
     wd.get(url = url)
     script = """
     function get(cls, x){ return $(x).find(cls).text(); }
@@ -54,10 +56,10 @@ def fake_get_from_server(date, mandante, visitante):
     return fake['cache'][0:fake['count']]
 
 
-mandante_arr = []
-visitante_arr = []
-date_arr = []
-done_arr = []
+mandante_arr = ['flamengo']
+visitante_arr = ['atletico-mg']
+date_arr = ['2017-05-13']
+done_arr = [False]
 
 seen = {}
 
@@ -110,11 +112,12 @@ def get_next_game(date_st, date_end):
 
 def update_minute():
     for i in range(len(date_arr)):
-        if (done[i]):
+        if (done_arr[i]):
             continue
+        print("Rodando para i = {}".format(i))
 
         api_date = date_arr[i]
-        date_parts = date.split("-")
+        date_parts = api_date.split("-")
         date_parts.reverse()
         date = "-".join(date_parts)
         resp = fake_get_from_server(date, mandante_arr[i], visitante_arr[i])
@@ -129,7 +132,7 @@ def update_minute():
                 requests.post('http://a6824bbf.ngrok.io/sendRealTimeMessage/', json = json)
 
 
-def notify_new_game(): 
+def notify_new_game():
     next_game, ref = get_next_game(strftime("%Y-%m-%dT%H:%M:%S", gmtime()), (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S"))
     pprint(next_game)
     # Notify torcedores e interessados.
@@ -141,11 +144,11 @@ def notify_new_game():
         date_arr.append(date)
         mandante_arr.append(mandate)
         visitante_arr.append(visitante)
-        done_arr.append(false)
+        done_arr.append(False)
 
 while True:
     notify_new_game()
 
     for i in range(15):
         update_minute()
-        time.sleep(60)
+        time.sleep(5)

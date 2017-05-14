@@ -38,11 +38,7 @@ def hello():
                         elif payload['type'] == 'as_message' :
                             onmessage(recipient_id, payload['message'])
                     except:
-                        from pprint import pprint
-                        pprint(x)
-                        pprint(payload)
-                        if payload == 'setup':
-                            onmessage(recipient_id, "ola")
+                        onmessage(recipient_id, payload)
 
                 if 'message' in x:
                     recipient_id = x['sender']['id']
