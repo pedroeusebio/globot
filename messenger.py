@@ -107,6 +107,7 @@ def sendReaTimeMessage():
     mandante =  args.get('mandante')
     visitante = args.get('visitante')
     msg = args.get('msg')
+    img = args.get('img')
 
     convs_mandante  = conversation_repository.get_by_team(mandante)
     convs_visitante  = conversation_repository.get_by_team(visitante)
@@ -115,6 +116,8 @@ def sendReaTimeMessage():
 
     for conv in convs:
         bot.send_text_message(conv.user.recipient_id, msg)
+        if img:
+            bot.send_image_url(conv.user.recipient_id, img)
 
     return "Success"
 
