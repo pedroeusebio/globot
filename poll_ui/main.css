@@ -59,6 +59,9 @@ img {
     }
 }
 
-.input-group {
-  padding-top: 10px;
+.poll {
+  background-color: #ececec;
+  padding: 10px 10px 20px 10px;
+  border-radius: 20px;
+  margin-bottom: 20px;
 }
