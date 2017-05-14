@@ -13,6 +13,12 @@ class ConversationRepository:
         self.conversations[recipient_id] = conversation
         return conversation
 
+    def get_all(self):
+        return self.conversations.values()
+
+    def get_by_team(self, team_slug):
+        return [c for c in self.get_all() if c.user.team_slug == team_slug]
+
 class PollRepository:
     def __init__(self):
         self.polls = []

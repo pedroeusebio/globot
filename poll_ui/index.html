@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Globot - Nova Enquete</title>
+        <link rel="stylesheet" href="main.css"/>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <div class="container justify-content-md-center content">
+        <h1>Globot</h1>
+        <h2>Nova Enquete</h2>
+        <div class="alert alert-success alert-dismissible" role="alert">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <p class="success-msg"><strong>Well done!</strong> You successfully read this important alert message.</p>
+        </div>
+        <div class="alert alert-danger alert-dismissible" role="alert">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <p class="error-msg"><strong>Oh snap!</strong> <a href="#" class="alert-link">Change a few things up</a> and try submitting again.</p>
+        </div>
+          <form id="createPoll">
+            <div class="row align-items-start">
+              <div class="col-sm-8 input-group">
+                <span class="input-group-addon" id="question">Pergunta</span>
+                <input type="text" class="form-control" placeholder="Pergunta" aria-describedby="sizing-addon2" name="question">
+              </div>
+            </div>
+            <div class="row" id="div-options">
+              Opções: <br />
+              <div class="col-sm-8 input-group">
+                <span class="input-group-addon" id="option0">Opcao 1</span>
+                <input type="text" class="form-control" placeholder="opcao" aria-describedby="sizing-addon2" name="option">
+              </div>
+              <div class="col-sm-8 input-group">
+                <span class="input-group-addon" id="option1">Opcao 2</span>
+                <input type="text" class="form-control" placeholder="opcao" aria-describedby="sizing-addon2" name="option">
+              </div>
+              <div class="col-sm-8 input-group">
+                <span class="input-group-addon" id="option2">Opcao 3</span>
+                <input type="text" class="form-control" placeholder="opcao" aria-describedby="sizing-addon2" name="option">
+              </div>
+            </div>
+            <div class="row">
+              <button type="button" class="btn btn-info" id="addOption">+</button>
+            </div>
+            <div class="row">
+              <input type="submit"  class="btn btn-primary" value="Criar enquete"/>
+            </div>
+          </form>
+        </div>
+    </body>
+    <script src="main.js"></script>
+</html>
