@@ -122,7 +122,5 @@ def sendReaTimeMessage():
 def admin(path):
     return send_from_directory('poll_ui', path)
 
-        return "Success"
-
 if __name__ == "__main__":
     app.run(host="127.0.0.1")
