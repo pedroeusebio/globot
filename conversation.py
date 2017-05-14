@@ -10,6 +10,7 @@ from time import gmtime, strftime
 
 TextResponse = namedtuple('TextResponse', 'text')
 ImageUrlResponse = namedtuple('ImageUrlResponse', 'url')
+YesNoResponse = namedtuple('YesNoResponse', 'text')
 
 
 class State:
@@ -17,11 +18,18 @@ class State:
     ASKING_TEAM = 2
     CONFIRMING_TEAM = 3
     PROCESSING = 4
-    NOTIFY = 5
+    YESNO_NOTIFY = 5
+    YESNO_REALTIME = 6
+
+
+yes_array = ['sim', 'yes', 'yeah', 'si', 'claro', 'isso', 'eh', 'aham', 'perfeito', 'blz', 'jaeh']
+def is_positive(msg):
+    for yess in yes_array:
+        if yess.lower() == msg.lower():
+            return True
+    return False
 
 class Conversation:
-
-    yes_array = ['sim', 'yes', 'yeah', 'si', 'claro', 'isso', 'eh', 'aham', 'perfeito', 'blz', 'jaeh']
 
     def __init__(self, recipient_id):
         self.user = User(recipient_id)
@@ -45,6 +53,9 @@ class Conversation:
         if self.state == State.PROCESSING:
             return self.process_request(msg)
 
+        if self.state == State.YESNO_NOTIFY:
+            return self.yesno_notify(msg)
+
         return self.default(msg)
 
     def onboarding(self, msg):
@@ -65,12 +76,18 @@ class Conversation:
         return TextResponse('Você entrou com um time inválido! Por favor, tente novamente.')
 
     def confirming_team(self, msg):
-        for yess in Conversation.yes_array:
-            if yess.lower() == msg.lower():
-                self.state = State.PROCESSING
-                return [TextResponse("Show! Vamos torcer juntos para o {}!!".format(self.user.team_popular_name)), ImageUrlResponse(utils.get_equipe_escudo_url_by_id(self.user.team_id))]
+        if is_positive(msg):
+            self.state = State.PROCESSING
+            return [TextResponse("Show! Vamos torcer juntos para o {}!!".format(self.user.team_popular_name)), ImageUrlResponse(utils.get_equipe_escudo_url_by_id(self.user.team_id))]
         self.state = State.ASKING_TEAM
         return TextResponse('Por favor, tente novamente. Qual o seu time do coração? <3')
+
+    def yesno_notify(self, msg):
+        self.state = State.PROCESSING
+        if is_positive(msg):
+            return TextResponse("Ok. Irei te avisar quando for a hora.")
+        else:
+            self.user.interest = None
 
     def get_min_index_from_arr(self, arr, msg):
         index = len(msg)
@@ -103,7 +120,7 @@ class Conversation:
             else:
                 team_slug = utils.get_equipe_id_by_slug(self.user.team_slug)
             if (team_slug is not None):
-                return TextResponse(programacao.get_next_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))    
+                return (team_slug, programacao.get_next_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))    
         return None
 
     def isLastGameRequest(self, msg):
@@ -118,22 +135,36 @@ class Conversation:
             else:
                 team_slug = utils.get_equipe_id_by_slug(self.user.team_slug)
             if (team_slug is not None):
-                return TextResponse(programacao.get_last_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))    
+                return (team_slug, programacao.get_last_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))    
         return None
 
 
     def default(self, msg):
         return TextResponse("Não sei o que dizer HAHAHA. Só vamo {}!".format(self.user.team_popular_name))
 
+    def notify_game(self, mandante, visitante):
+        msg = "Jogo %s x %s comecando em 1 hora.\nDeseja receber notificacoes em tempo real?" % (mandante, visitante)
+        self.state = State.YESNO_REALTIME
+        return YesNoResponse(msg)
 
     def process_request(self, msg):
-        resp = self.isNextGameRequest(msg)
-        if resp is not None:
-            self.state = state.NOTIFY
-            return resp
+        game_data = self.isNextGameRequest(msg)
+        if game_data is not None:
+            team_slug, msg = game_data
+            if (msg == "Nao foram encontrado jogos futuros."):
+                return TextResponse(msg)
 
-        resp = self.isLastGameRequest(msg)
-        if resp is not None:
-            return resp
+            else:
+                msg += "\nDeseja ser notificado 1 hora antes do inicio do jogo?"
+
+                self.state = State.YESNO_NOTIFY
+                self.user.interest = team_slug
+
+                return YesNoResponse(msg)
+
+        game_data = self.isLastGameRequest(msg)
+        if game_data is not None:
+            team_slug, resp = game_data
+            return TextResponse(resp)
 
         return self.default(msg)

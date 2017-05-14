@@ -1,6 +1,7 @@
 from selenium import webdriver
 from pprint import pprint
 from random import random
+from datetime import datetime, timedelta
 import time
 import json
 import requests
@@ -9,52 +10,94 @@ import urllib
 HEADERS = {'token': 'hack2017-grupo3'}
 URL_BASE = 'https://api.sde.globo.com/esportes/futebol/modalidades/futebol_de_campo/categorias/profissional'
 
-
-url = 'http://globoesporte.globo.com/rj/futebol/brasileirao-serie-a/jogo/13-05-2017/flamengo-atletico-mg/'
-
-wd = webdriver.PhantomJS()
-wd.get(url = url)
-script = """
-function get_time(x){ return $(x).find(".tempo-lance").text(); }
-function get_desc(x){ return $(x).find(".descricao-lance").text(); }
-function get_id(x) { return x.getAttribute("id"); }
-function get_data(x){
-    return {
-       id: get_id(x),
-       time: get_time(x),
-       desc: get_desc(x)
-    };
-}
-var data = $('.lance-a-lance-container .lance-normal[id]').map(function(i,x){ return get_data(x); } );
-return data;
-"""
-
-def get_from_server():
-	return wd.execute_script(script)
+def get_from_server(date,mandante,visitante):
+    wd = webdriver.PhantomJS()
+    url = "http://globoesporte.globo.com/rj/futebol/brasileirao-serie-a/jogo/{}/{}-{}/".format(date,mandante,visitante)
+    wd.get(url = url)
+    script = """
+    function get(cls, x){ return $(x).find(cls).text(); }
+    function get_img(x) {
+      var $img = $(x).find(".thumb-midia-container > img");
+      var src = $img.attr('src');
+      var dataSrc = $img.data('src');
+      return dataSrc || src;
+    }
+    function get_id(x) { return x.getAttribute("id"); }
+    function get_data(x){
+        return {
+           id: get_id(x),
+           time: get(".minuto-lance", x),
+           period: get(".periodo-lance", x),
+           title: get(".titulo-lance", x),
+           img: get_img(x),
+           desc: get(".descricao-lance", x)
+        };
+    }
+    var data = $('.lance-a-lance-container .lance-normal[id]').map(function(i,x){ return get_data(x); } );
+    return data;
+    """
+    return wd.execute_script(script)
 
 fake = {}
 fake['cache'] = None
 fake['count'] = 0
 
-def fake_get_from_server():
-	if fake['cache'] == None:
-		fake['cache'] = get_from_server()
-		fake['cache'].reverse()
+def fake_get_from_server(date, mandante, visitante):
+    if fake['cache'] == None:
+        fake['cache'] = get_from_server(date, mandante, visitante)
+        fake['cache'].reverse()
 
-	step = round(random()*3)
-	fake['count'] += step
+    step = round(random()*3)
+    fake['count'] += step
 
-	return fake['cache'][0:fake['count']]
+    return fake['cache'][0:fake['count']]
 
 
 mandante = "flamengo"
 visitante = "atletico-mg"
+date = "13-05-2017"
 
 seen = {}
 
 def present(entry):
-	return entry['desc']
+    desc = entry['desc'].strip()
+    titulo = entry['title']
+    timestr = entry['period']
+    if entry['time'] != '':
+        timestr = entry['time'] + ' ' + timestr
 
+    msg = timestr + '\n' + titulo + '\n\n' + desc
+
+    json = {
+        'mandante': mandante,
+        'visitante': visitante,
+        'msg': msg}
+
+    if entry['img']:
+        json['img'] = entry['img']
+
+    return json
+
+#   Game Raw Data Example
+# 	{u'cancelado': False,
+#	 u'data_realizacao': u'2017-05-14',
+#	 u'decisivo': False,
+#	 u'equipe_mandante_id': 266,
+#	 u'equipe_visitante_id': 277,
+#	 u'escalacao_mandante_id': 451761,
+#	 u'escalacao_visitante_id': 451758,
+#	 u'fase_id': 5196,
+#	 u'hora_realizacao': u'11:00:00',
+#	 u'jogo_id': 211239,
+#	 u'placar_oficial_mandante': None,
+#	 u'placar_oficial_visitante': None,
+#	 u'placar_penaltis_mandante': None,
+#	 u'placar_penaltis_visitante': None,
+#	 u'rodada': 1,
+#	 u'sede_id': 277,
+#	 u'suspenso': False,
+#	 u'vencedor_jogo': None,
+#	 u'wo': False}
 def get_next_game(date_st, date_end):
 	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/jogos?data_hora_inicial=%s&data_hora_final=%s' % (date_st, date_end)
 	resp = requests.get(url, headers=HEADERS).json()
@@ -63,16 +106,21 @@ def get_next_game(date_st, date_end):
 	return "Nao foram encontrado jogos futuros.", None
 
 while True:
-	arr = []
-	resp = fake_get_from_server()
-	for x in resp:
-		if (x['id'] in seen):
-			continue
-		seen[x['id']] = True
-		print("Sending msg id {}".format(x['id']))
+	next_game, ref = get_next_game(strftime("%Y-%m-%dT%H:%M:%S", gmtime()), strftime("%Y-%m-%dT%H:%M:%S", datetime.now() + timedelta(hours=1)))
+    
+    # Notify torcedores e interessados.
+    if (ref is not None):
+    	date = next_game['data_realizacao']
+    	mandante = get_slug_by_equipe_id(next_game['equipe_mandante_id'])
+    	visitante = get_slug_by_equipe_id(next_game['equipe_visitante_id'])
+	    resp = fake_get_from_server(date, mandante, visitante)
+	    for x in resp:
+	        if (x['id'] in seen):
+	            continue
+	        seen[x['id']] = True
+	        print("Sending msg id {}".format(x['id']))
 
-		if (x['desc'] != '\n'):
-			requests.post('http://a6824bbf.ngrok.io/sendRealTimeMessage/', json = {'mandante': mandante, 'visitante': visitante, 'msg': present(x)})
-			
-		
-	time.sleep(15)
+	        if (x['desc'] != '\n'):
+	            requests.post('http://a6824bbf.ngrok.io/sendRealTimeMessage/', json = present(x))
+
+    time.sleep(5)

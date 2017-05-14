@@ -2,7 +2,7 @@ import secrets
 import json
 from flask import Flask, request, jsonify, send_from_directory
 from pymessenger import Bot
-from conversation import TextResponse,ImageUrlResponse
+from conversation import TextResponse,ImageUrlResponse, YesNoResponse
 from repo import ConversationRepository, PollRepository
 from poll import Poll
 from user import TeamSlugFilter
@@ -30,30 +30,42 @@ def hello():
             for x in messaging:
                 if 'postback' in x:
                     recipient_id = x['sender']['id']
-                    conversation = conversation_repository.get_or_create(recipient_id)
                     payload = json.loads(x['postback']['payload'])
                     if payload['type'] == 'poll_answer':
                         answer_poll(recipient_id, payload['uid'], payload['option'])
+                    elif payload['type'] == 'as_message' :
+                        onmessage(recipient_id, payload['message'])
 
                 if 'message' in x:
                     recipient_id = x['sender']['id']
-                    conversation = conversation_repository.get_or_create(recipient_id)
                     if x['message'].get('text'):
                         message = x['message']['text']
+                        onmessage(recipient_id, message)
 
-                        responses = conversation.message(message)
-
-                        if not isinstance(responses, list):
-                            responses = [responses]
-
-                        for response in responses:
-                            if isinstance(response, TextResponse):
-                                bot.send_text_message(recipient_id, response.text)
-                            elif isinstance(response, ImageUrlResponse):
-                                bot.send_image_url(recipient_id, response.url)
                 else:
                     pass
         return "Success"
+
+def onmessage(recipient_id, message):
+    conversation = conversation_repository.get_or_create(recipient_id)
+    responses = conversation.message(message)
+
+    send_response(recipient_id, responses)
+
+def send_response(recipient_id, responses):
+    if not isinstance(responses, list):
+        responses = [responses]
+
+    for response in responses:
+        if isinstance(response, TextResponse):
+            bot.send_text_message(recipient_id, response.text)
+        elif isinstance(response, ImageUrlResponse):
+            bot.send_image_url(recipient_id, response.url)
+        elif isinstance(response, YesNoResponse):
+            def mkbutton(o):
+                return make_button(o, {'type': 'as_message', 'message': o})
+            buttons = [mkbutton(o) for o in ['Sim', 'Nao']]
+            bot.send_button_message(recipient_id, response.text, buttons)
 
 def answer_poll(recipient_id, poll_uid, option):
     poll = poll_repository.get(poll_uid)
@@ -61,6 +73,13 @@ def answer_poll(recipient_id, poll_uid, option):
         return
 
     poll.add_answer(recipient_id, option)
+
+def make_button(title, payload):
+    return {
+        "type": "postback",
+        "title": o,
+        "payload": json.dumps(payload)
+    }
 
 @app.route("/createPoll/", methods=['POST'])
 def createPoll():
@@ -72,21 +91,17 @@ def createPoll():
     poll = Poll(question, options, TeamSlugFilter(team))
     poll_repository.insert(poll)
 
-    def make_button(o):
+    def mkbutton(o):
         payload = {
             'type': 'poll_answer',
             'uid': poll.uid,
             'option': o
         }
-        return {
-            "type": "postback",
-            "title": o,
-            "payload": json.dumps(payload)
-        }
+        return make_button(o, payload)
 
     convs = conversation_repository.get_by_team(team)
     for conv in convs:
-        bot.send_button_message(conv.user.recipient_id, question, [make_button(o) for o in options])
+        bot.send_button_message(conv.user.recipient_id, question, [mkbutton(o) for o in options])
 
     return "Success"
 
@@ -107,6 +122,7 @@ def sendReaTimeMessage():
     mandante =  args.get('mandante')
     visitante = args.get('visitante')
     msg = args.get('msg')
+    img = args.get('img')
 
     convs_mandante  = conversation_repository.get_by_team(mandante)
     convs_visitante  = conversation_repository.get_by_team(visitante)
@@ -115,14 +131,31 @@ def sendReaTimeMessage():
 
     for conv in convs:
         bot.send_text_message(conv.user.recipient_id, msg)
+        if img:
+            bot.send_image_url(conv.user.recipient_id, img)
+
+    return "Success"
+
+@app.route("/notifyGame/", methods=['POST'])
+def notifyGame():
+    args = request.get_json()
+    mandante =  args.get('mandante')
+    visitante = args.get('visitante')
+
+    convs_mandante  = conversation_repository.get_by_interest(mandante)
+    convs_visitante  = conversation_repository.get_by_interest(visitante)
+
+    convs = convs_mandante + convs_visitante
+
+    for conv in convs:
+        responses = conv.notify_game(mandante, visitante)
+        send_response(conv.user.recipient_id, responses)
 
     return "Success"
 
 @app.route("/admin/<path:path>")
 def admin(path):
     return send_from_directory('poll_ui', path)
-
-        return "Success"
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1")
