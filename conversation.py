@@ -67,7 +67,7 @@ class Conversation:
         for yess in Conversation.yes_array:
             if yess.lower() == msg.lower():
                 self.state = State.PROCESSING
-                return [TextResponse("Show! Vamos torcer juntos para o {}!!".format(utils.get_nickname_from_slug(self.user.team_slug)), ImageUrlResponse(utils.get_equipe_escudo_url_by_id(self.user.team_id))]
+                return [TextResponse("Show! Vamos torcer juntos para o {}!!".format(utils.get_nickname_from_slug(self.user.team_slug))), ImageUrlResponse(utils.get_equipe_escudo_url_by_id(self.user.team_id))]
         self.state = State.ASKING_TEAM
         return TextResponse('Por favor, tente novamente. Qual o seu time do coração? <3')
 
