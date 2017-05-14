@@ -23,7 +23,7 @@ class PollRepository:
     def __init__(self):
         self.polls = []
 
-    def create(self, poll):
+    def insert(self, poll):
         self.polls.append(poll)
         poll.uid = len(self.polls)
         return poll
@@ -35,4 +35,4 @@ class PollRepository:
         if len(self.polls) < uid:
             return None
 
-        return self.polls[uid]
+        return self.polls[uid-1]

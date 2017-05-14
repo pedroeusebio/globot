@@ -30,6 +30,10 @@ def get_equipe_by_id(id):
 			return equipe
 	return None
 
+def get_equipe_escudo_url_by_id(id):
+	equipe = get_equipe_by_id(id)
+	return equipe['escudos']['60x60']
+
 def get_equipe_by_slug(slug):
 	equipes = query_equipes()['resultados']['equipes']
 	for equipe in equipes:
