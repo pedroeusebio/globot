@@ -30,11 +30,19 @@ def hello():
             for x in messaging:
                 if 'postback' in x:
                     recipient_id = x['sender']['id']
-                    payload = json.loads(x['postback']['payload'])
-                    if payload['type'] == 'poll_answer':
-                        answer_poll(recipient_id, payload['uid'], payload['option'])
-                    elif payload['type'] == 'as_message' :
-                        onmessage(recipient_id, payload['message'])
+                    payload = x['postback']['payload']
+                    try:
+                        payload = json.loads(payload)
+                        if payload['type'] == 'poll_answer':
+                            answer_poll(recipient_id, payload['uid'], payload['option'])
+                        elif payload['type'] == 'as_message' :
+                            onmessage(recipient_id, payload['message'])
+                    except:
+                        from pprint import pprint
+                        pprint(x)
+                        pprint(payload)
+                        if payload == 'setup':
+                            onmessage(recipient_id, "ola")
 
                 if 'message' in x:
                     recipient_id = x['sender']['id']
