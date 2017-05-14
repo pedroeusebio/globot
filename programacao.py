@@ -16,7 +16,7 @@ def get_stadium_name(ref, stadium_id):
 def get_team_name(ref, team_id):
 	return ref['equipes'][str(team_id)]['nome_popular']
 
-#   Next Game Raw Data Example
+#   Game Raw Data Example
 # 	{u'cancelado': False,
 #	 u'data_realizacao': u'2017-05-14',
 #	 u'decisivo': False,
@@ -39,8 +39,10 @@ def get_team_name(ref, team_id):
 def get_next_game(team_id, date):
 	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/jogos?equipe_id=%s&data_hora_inicial=%s' % (team_id, date)
 	resp = requests.get(url, headers=HEADERS).json()
-	return resp['resultados']['jogos'][0],  resp['referencias']
-
+	if ('jogos' in resp['resultados'].keys()):
+		return resp['resultados']['jogos'][0],  resp['referencias']
+	return "Nao foram encontrado jogos futuros.", None
+	
 # Formato da resposta:
 #  Campeonato Brasileiro 2017
 #  Dia, Horario
@@ -49,6 +51,8 @@ def get_next_game(team_id, date):
 #
 def get_next_game_formatted(team_id, date):
 	game_info, ref = get_next_game(team_id, date)
+	if (ref is None):
+		return game_info
 	dia = game_info['data_realizacao']
 	horario = game_info['hora_realizacao']
 	estadio = get_stadium_name(ref, game_info['sede_id'])
@@ -56,7 +60,33 @@ def get_next_game_formatted(team_id, date):
 	timeB = get_team_name(ref, game_info['equipe_mandante_id'])
 	#TODO: add logo for teams
 	return '''Campeonato Brasileiro 2017\n%s, %s\n%s\n%s x %s\n''' % (dia, horario, estadio, timeA, timeB)
-	
+
+def get_last_game(team_id, date):
+	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/jogos?equipe_id=%s&data_hora_final=%s&ord=desc' % (team_id, date)
+	resp = requests.get(url, headers=HEADERS).json()
+	#pprint(resp)
+	if ('jogos' in resp['resultados'].keys()):
+		return resp['resultados']['jogos'][0],  resp['referencias']
+	return "Nao foram encontrado jogos anteriores.", None
+
+def get_last_game_formatted(team_id, date):
+	game_info, ref = get_last_game(team_id, date)
+	if (ref is None):
+		return game_info
+	dia = game_info['data_realizacao']
+	horario = game_info['hora_realizacao']
+	estadio = get_stadium_name(ref, game_info['sede_id'])
+	timeA = get_team_name(ref, game_info['equipe_visitante_id'])
+	timeB = get_team_name(ref, game_info['equipe_mandante_id'])
+	scoreA = game_info['placar_oficial_visitante']
+	scoreB = game_info['placar_oficial_mandante']
+	#TODO: add logo for teams
+	return '''Campeonato Brasileiro 2017\n%s, %s\n%s\n%s %s - %s %s\n''' % (dia, horario, estadio, timeA, scoreA, scoreB, timeB)
+
+#url = 'https://api.sde.globo.com/jogos/211240/scouts'
+url = 'https://api.sde.globo.com/atletas/63007'
+resp = requests.get(url, headers=HEADERS)
+pprint(resp)
 #response = get_next_game_formatted(266, "2017-05-01")
 #print(response)
 
