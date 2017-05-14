@@ -122,11 +122,12 @@ class Conversation:
         return None
 
     def dontFuckWithMe(self, msg):
-        msg = msg.lower()
-        tries = ['bosta', 'merda', 'foda', 'foder', 'fuder', 'tomar no c', 'toma no c', 'puta', 'puto', 'caralho', 'porra', 'vtnc', 'viado', 'merdinha', 'bostinha']
+        msgs = msg.lower().split(" ")
+        tries = ['merda', 'fod', 'fud', 'tomar no c', 'toma no c', 'puta', 'puto', 'putao', 'caralh', 'porra', 'vtnc', 'viado', 'bost', 'merd', 'buc', 'cuz']
         for a_try in tries:
-            if a_try in msg:
-                return random.choice(['Seu arrombado!', 'Sua mãe!', 'Näo me fode', 'Vou te desmaiar, seu bostinha!', '{} é um time bosta. Que nem você!'.format(self.user.team_popular_name)])
+            for msg in msgs:
+                if a_try in msg:
+                    return TextResponse(random.choice(['Seu arrombado!', 'Sua mãe!', 'Näo me fode', 'Vou te desmaiar, seu bostinha!', '{} é um time bosta. Que nem você!'.format(self.user.team_popular_name)]))
         return None
 
     def default(self, msg):
