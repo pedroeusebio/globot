@@ -64,7 +64,7 @@ def send_response(recipient_id, responses):
         elif isinstance(response, YesNoResponse):
             def mkbutton(o):
                 return make_button(o, {'type': 'as_message', 'message': o})
-            buttons = [mkbutton(o) for o in ['Sim', 'Nao']]
+            buttons = [mkbutton(o) for o in ['Sim', 'Não']]
             bot.send_button_message(recipient_id, response.text, buttons)
 
 def answer_poll(recipient_id, poll_uid, option):

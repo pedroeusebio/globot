@@ -67,7 +67,7 @@ def get_last_game(team_id, date):
 	#pprint(resp)
 	if ('jogos' in resp['resultados'].keys()):
 		return resp['resultados']['jogos'][0],  resp['referencias']
-	return "Nao foram encontrado jogos anteriores.", None
+	return "Não foram encontrado jogos anteriores.", None
 
 def get_last_game_formatted(team_id, date):
 	game_info, ref = get_last_game(team_id, date)

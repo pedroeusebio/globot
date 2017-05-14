@@ -78,3 +78,16 @@ def get_game_by_mandante_slug_visitante_slug_date(mandante_slug, date):
 	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/jogos?equipe_id=%s&data_hora_inicial=%s&data_hora_final=%s' % (get_equipe_id_by_slug(mandante_slug), date, date)
 	response = requests.get(url, headers=HEADERS)
 	return response.json()
+
+def get_nickname_from_slug(slug):
+	# Upstream: http://nomeschiques.com/lista-de-25-apelidos-de-times-brasileiros-e-seus-rivais-humor/
+	d = {
+		'flamengo': 'Mengão',
+		'vasco': 'Vascão',
+		'botafogo': 'Fogão',
+		'fluminense': 'Nense',
+		'atlético-mg': 'Galo',
+		'corinthians': 'Timão',
+		'internacional': 'Inter',
+	}
+	return d.get(slug, slug)

@@ -103,7 +103,7 @@ def get_next_game(date_st, date_end):
 	resp = requests.get(url, headers=HEADERS).json()
 	if ('jogos' in resp['resultados'].keys()):
 		return resp['resultados']['jogos'][0],  resp['referencias']
-	return "Nao foram encontrado jogos futuros.", None
+	return "Não foram encontrado jogos futuros.", None
 
 while True:
 	next_game, ref = get_next_game(strftime("%Y-%m-%dT%H:%M:%S", gmtime()), strftime("%Y-%m-%dT%H:%M:%S", datetime.now() + timedelta(hours=1)))

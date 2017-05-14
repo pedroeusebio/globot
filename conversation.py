@@ -5,6 +5,7 @@ from collections import namedtuple
 from user import User
 from fuzzywuzzy import fuzz
 import programacao
+import random
 import utils
 from time import gmtime, strftime
 
@@ -60,7 +61,7 @@ class Conversation:
 
     def onboarding(self, msg):
         self.state = State.ASKING_TEAM
-        return TextResponse("Olá, {}. Vamos começar. Qual é o seu time do coração? <3".format(self.user.name))
+        return TextResponse("Alô alô, vamos nessa, {}! ⚽ \nQual é o seu time do coração? <3".format(self.user.name))
 
     def asking_team(self, msg):
         equipes = utils.get_list_of_equipes_popular_names() # String: 'Flamengo'
@@ -72,20 +73,20 @@ class Conversation:
                 if self.user.team_id is None:
                     break
                 self.state = State.CONFIRMING_TEAM
-                return TextResponse("Irado! Seu time é o {}, certo?".format(self.user.team_popular_name))
+                return TextResponse("Irado! 😎 Seu time é o {}, né?".format(self.user.team_popular_name))
         return TextResponse('Você entrou com um time inválido! Por favor, tente novamente.')
 
     def confirming_team(self, msg):
         if is_positive(msg):
             self.state = State.PROCESSING
-            return [TextResponse("Show! Vamos torcer juntos para o {}!!".format(self.user.team_popular_name)), ImageUrlResponse(utils.get_equipe_escudo_url_by_id(self.user.team_id))]
+            return [TextResponse("Show! Vamos torcer juntos para o {}!!".format(utils.get_nickname_from_slug(self.user.team_slug))), ImageUrlResponse(utils.get_equipe_escudo_url_by_id(self.user.team_id))]
         self.state = State.ASKING_TEAM
         return TextResponse('Por favor, tente novamente. Qual o seu time do coração? <3')
 
     def yesno_notify(self, msg):
         self.state = State.PROCESSING
         if is_positive(msg):
-            return TextResponse("Ok. Irei te avisar quando for a hora.")
+            return TextResponse("Ok! Irei te avisar quando for a hora 😉")
         else:
             self.user.interest = None
 
@@ -104,7 +105,7 @@ class Conversation:
     def get_token_on_ind(self, ind, msg):
         for i in range(ind, len(msg)):
             if (not msg[i].isalpha()):
-                return msg[ind:i] 
+                return msg[ind:i]
         return msg[ind:]
 
 
@@ -138,12 +139,11 @@ class Conversation:
                 return (team_slug, programacao.get_last_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))    
         return None
 
-
     def default(self, msg):
-        return TextResponse("Não sei o que dizer HAHAHA. Só vamo {}!".format(self.user.team_popular_name))
+        return TextResponse("Não sei o que dizer HAHAHA. Só vamos, {}! ⚽".format(self.user.team_popular_name))
 
     def notify_game(self, mandante, visitante):
-        msg = "Jogo %s x %s comecando em 1 hora.\nDeseja receber notificacoes em tempo real?" % (mandante, visitante)
+        msg = "Jogo %s x %s começando em 1 hora.\nDeseja receber notificações em tempo real?" % (mandante, visitante)
         self.state = State.YESNO_REALTIME
         return YesNoResponse(msg)
 
@@ -151,11 +151,11 @@ class Conversation:
         game_data = self.isNextGameRequest(msg)
         if game_data is not None:
             team_slug, msg = game_data
-            if (msg == "Nao foram encontrado jogos futuros."):
+            if (msg == "Não foram encontrado jogos futuros."):
                 return TextResponse(msg)
 
             else:
-                msg += "\nDeseja ser notificado 1 hora antes do inicio do jogo?"
+                msg += "\nDeseja ser notificado 1 hora antes do início do jogo?"
 
                 self.state = State.YESNO_NOTIFY
                 self.user.interest = team_slug
