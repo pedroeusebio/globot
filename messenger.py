@@ -57,6 +57,19 @@ def hello():
                     pass
         return "Success"
 
+
+@app.route("/createPoll/", methods=['POST'])
+def createPoll():
+    if request.method == 'POST':
+        question = request.args.get('question')
+        options = request.args.get('question')
+        team = request.args.get('team')
+
+        convs  = get_conversations_for(team)
+        for recipient_id, conv in convs:
+            bot.send_text_message(recipient_id, t )
+
+
 @app.route("/sendRealTimeMessage/", methods=['POST'])
 def sendReaTimeMessage():
     if request.method == 'POST':
