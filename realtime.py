@@ -1,5 +1,6 @@
 from selenium import webdriver
 from pprint import pprint
+from random import random
 import requests
 import time
 
@@ -22,22 +23,43 @@ var data = $('.lance-a-lance-container .lance-normal[id]').map(function(i,x){ re
 return data;
 """
 
+def get_from_server():
+	return wd.execute_script(script)
+
+fake = {}
+fake['cache'] = None
+fake['count'] = 0
+
+def fake_get_from_server():
+	if fake['cache'] == None:
+		fake['cache'] = get_from_server()
+		fake['cache'].reverse()
+
+	step = round(random()*3)
+	fake['count'] += step
+
+	return fake['cache'][0:fake['count']]
+
+
 mandante = "flamengo"
 visitante = "atletico-mg"
 
 seen = {}
 
+def present(entry):
+	return entry['desc']
+
 while True:
-	resp = wd.execute_script(script)
 	arr = []
+	resp = fake_get_from_server()
 	for x in resp:
 		if (x['id'] in seen):
 			continue
 		seen[x['id']] = True
+		print("Sending msg id {}".format(x['id']))
+
 		if (x['desc'] != '\n'):
-			arr.append((x['id'], x['time'], x['desc']))
-		arr.sort()
-		requests.post('http://localhost:8080', data = {'mandante': mandante, 'visitante': visitante, 'payload': arr})
-	time.sleep(60)
-
-
+			requests.post('http://a6824bbf.ngrok.io/sendRealTimeMessage/', json = {'mandante': mandante, 'visitante': visitante, 'msg': present(x)})
+			
+		
+	time.sleep(5)

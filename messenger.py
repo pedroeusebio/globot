@@ -87,5 +87,7 @@ def sendReaTimeMessage():
         for conv in convs:
             bot.send_text_message(msg)
 
+        return "Success"
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="127.0.0.1")
