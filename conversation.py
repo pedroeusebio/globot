@@ -20,7 +20,7 @@ class State:
 
 class Conversation:
 
-    yes_array = ['simm', 'sim', 'yes', 'yeah', 'si', 'claro', 'isso']
+    yes_array = ['sim', 'yes', 'yeah', 'si', 'claro', 'isso', 'eh', 'aham', 'perfeito', 'blz', 'jaeh']
 
     def __init__(self, recipient_id):
         self.user = User(recipient_id)
@@ -55,19 +55,19 @@ class Conversation:
         for equipe in equipes:
             if fuzz.ratio(equipe, msg) > 49:
                 self.user.team_slug = msg.lower().replace(" ", "-")
+                self.user.team_popular_name = utils.get_popular_name_by_slug(self.user.team_slug)
                 self.user.team_id = utils.get_equipe_id_by_slug(self.user.team_slug)
                 if self.user.team_id is None:
                     break
                 self.state = State.CONFIRMING_TEAM
-                return TextResponse("Irado! Seu time é o {}, certo?".format(self.user.team_slug))
+                return TextResponse("Irado! Seu time é o {}, certo?".format(self.user.team_popular_name))
         return TextResponse('Você entrou com um time inválido! Por favor, tente novamente.')
 
     def confirming_team(self, msg):
         for yess in Conversation.yes_array:
             if yess.lower() == msg.lower():
                 self.state = State.PROCESSING
-                return [TextResponse("Show! Vamos torcer juntos para o {}!!".format(self.user.team_slug)), ImageUrlResponse(utils.get_equipe_escudo_url_by_id(self.user.team_id))]
-
+                return [TextResponse("Show! Vamos torcer juntos para o {}!!".format(self.user.team_popular_name)), ImageUrlResponse(utils.get_equipe_escudo_url_by_id(self.user.team_id))]
         self.state = State.ASKING_TEAM
         return TextResponse('Por favor, tente novamente. Qual o seu time do coração? <3')
 
@@ -94,23 +94,36 @@ class Conversation:
         next_ind = self.find_token_index(msg, ["proximo", "próximo", "proxima", "próxima"])
         game_ind = self.find_token_index(msg, ["jogo", "partida", "game", "rodada"])
         team_ind = self.find_token_index(msg, utils.get_list_of_equipes_popular_names())
-        if (next_ind != -1 and game_ind != -1 and team_ind != -1):
-            if (next_ind < game_ind and game_ind < team_ind):
+        maxlen = len(msg)
+        if (next_ind != maxlen and game_ind != maxlen):
+            team_slug = ""
+            if (team_ind != maxlen):
                 team_slug = utils.get_equipe_id_by_slug(self.get_token_on_ind(team_ind, msg).lower())
-                if (team_slug is not None):
-                    return TextResponse(programacao.get_next_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))
+            else:
+                team_slug = utils.get_equipe_id_by_slug(self.user.team_slug)
+            if (team_slug is not None):
+                return TextResponse(programacao.get_next_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))    
         return None
 
     def isLastGameRequest(self, msg):
         next_ind = self.find_token_index(msg, ["ultimo", "último", "anterior", "passada"])
         game_ind = self.find_token_index(msg, ["jogo", "partida", "game", "rodada"])
         team_ind = self.find_token_index(msg, utils.get_list_of_equipes_popular_names())
-        if (next_ind != -1 and game_ind != -1 and team_ind != -1):
-            if (next_ind < game_ind and game_ind < team_ind):
+        maxlen = len(msg)
+        if (next_ind != maxlen and game_ind != maxlen):
+            team_slug = ""
+            if (team_ind != maxlen):
                 team_slug = utils.get_equipe_id_by_slug(self.get_token_on_ind(team_ind, msg).lower())
-                if (team_slug is not None):
-                    return TextResponse(programacao.get_last_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))
+            else:
+                team_slug = utils.get_equipe_id_by_slug(self.user.team_slug)
+            if (team_slug is not None):
+                return TextResponse(programacao.get_last_game_formatted(team_slug, strftime("%Y-%m-%dT%H:%M:%S", gmtime())))    
         return None
+
+
+    def default(self, msg):
+        return TextResponse("Não sei o que dizer HAHAHA. Só vamo {}!".format(self.user.team_popular_name))
+
 
     def process_request(self, msg):
         resp = self.isNextGameRequest(msg)
@@ -121,8 +134,4 @@ class Conversation:
         if resp is not None:
             return resp
 
-
-        self.default(msg)
-
-    def default(self, msg):
-        return TextResponse("Não sei o que dizer HAHAHA. Só vamo {}!".format(self.user.team_slug))
+        return self.default(msg)

@@ -62,6 +62,13 @@ def get_list_of_equipes_popular_names():
 		ret.append(equipe['nome_popular'])
 	return ret
 
+def get_popular_name_by_slug(slug):
+	equipes = query_equipes()['resultados']['equipes']
+	for equipe in equipes:
+		if (equipe['slug'] == slug):
+			return equipe['nome_popular']
+	return slug
+
 def get_next_game_by_equipe_id_initial_date(equipe_id, initial_date = '2017-03-13'):
 	url = URL_BASE + '/campeonatos/campeonato-brasileiro/edicoes/campeonato-brasileiro-2017/jogos?equipe_id=%s&data_hora_inicial=%s' % (equipe_id, initial_date)
 	response = requests.get(url, headers=HEADERS)
