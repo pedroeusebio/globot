@@ -16,8 +16,7 @@ class State:
 class Conversation:
     def __init__(self, recipient_id):
         self.user = User(recipient_id)
-        self.state = State.ONBOARDING
-        self.messages = []
+        self.state = State.ONBOARDING self.messages = []
 
     def message(self, msg):
         self.messages.append(msg)
@@ -98,13 +97,13 @@ class Conversation:
         resp = self.isNextGameRequest(msg)
         if resp is not None:
             return resp
-        
+
         resp = self.isLastGameRequest(msg)
         if resp is not None:
             return resp
-        
+
 
         self.default(msg)
-                
+
     def default(self, msg):
         return TextResponse("Não sei o que dizer HAHAHA. Só vamo {}!".format(self.user.team_slug))
