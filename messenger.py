@@ -1,7 +1,8 @@
 import secrets
+
 from flask import Flask, request
 from pymessenger import Bot
-from conversation import TextResponse
+from conversation import TextResponse,ImageUrlResponse
 from repo import ConversationRepository
 
 conversation_repository = ConversationRepository()
@@ -50,9 +51,17 @@ def hello():
                     conversation = conversation_repository.get_or_create(recipient_id)
                     if x['message'].get('text'):
                         message = x['message']['text']
-                        response = conversation.message(message)
-                        if isinstance(response, TextResponse):
-                            bot.send_text_message(recipient_id, response.text)
+
+                        responses = conversation.message(message)
+
+                        if not isinstance(responses, list):
+                            responses = [responses]
+
+                        for response in responses:
+                            if isinstance(response, TextResponse):
+                                bot.send_text_message(recipient_id, response.text)
+                            elif isinstance(response, ImageUrlResponse):
+                                bot.send_image_url(recipient_id, response.url)
                 else:
                     pass
         return "Success"

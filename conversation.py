@@ -9,6 +9,8 @@ import utils
 from time import gmtime, strftime
 
 TextResponse = namedtuple('TextResponse', 'text')
+ImageUrlResponse = namedtuple('ImageUrlResponse', 'url')
+
 
 class State:
     ONBOARDING = 1
@@ -18,7 +20,7 @@ class State:
 
 class Conversation:
 
-    yes_array = ['sim', 'yes', 'yeah', 'si', 'claro', 'isso']
+    yes_array = ['simm', 'sim', 'yes', 'yeah', 'si', 'claro', 'isso']
 
     def __init__(self, recipient_id):
         self.user = User(recipient_id)
@@ -64,7 +66,7 @@ class Conversation:
         for yess in Conversation.yes_array:
             if yess.lower() == msg.lower():
                 self.state = State.PROCESSING
-                return TextResponse("Show! Vamos torcer juntos para o {}!!".format(self.user.team_slug))
+                return [TextResponse("Show! Vamos torcer juntos para o {}!!".format(self.user.team_slug)), ImageUrlResponse(utils.get_equipe_escudo_url_by_id(self.user.team_id))]
 
         self.state = State.ASKING_TEAM
         return TextResponse('Por favor, tente novamente. Qual o seu time do coração? <3')
@@ -80,7 +82,7 @@ class Conversation:
     def find_token_index(self, msg, arr):
         msg = msg.lower()
         return self.get_min_index_from_arr(arr, msg)
-    
+
     def get_token_on_ind(self, ind, msg):
         for i in range(ind, len(msg)):
             if (not msg[i].isalpha()):
