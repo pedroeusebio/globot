@@ -9,6 +9,7 @@ class User:
     def __init__(self, recipient_id):
         self.recipient_id = recipient_id
         self.team_slug = None
+        self.team_popular_name = None
         self.team_id = None
         self.name = self.get_name(recipient_id)
 
