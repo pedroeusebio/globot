@@ -1,3 +1,14 @@
+# Hackathon Globo 2017
+
+See http://g1.globo.com/tecnologia/hackathon/2017/
+
+# Team Members
+
+- Bernardo Dornellas
+- Eduardo Ferreira
+- Pedro Eusébio
+- Thiago Perrotta
+
 # Installing
 
 1. Install python3
